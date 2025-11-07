@@ -1,5 +1,4 @@
 import * as core from '@actions/core';
-import * as github from '@actions/github';
 import { getLatestRelease, getAllReleases } from './checker';
 import { evaluateDaysPolicy, evaluateVersionPolicy, PolicyResult } from './policy';
 
