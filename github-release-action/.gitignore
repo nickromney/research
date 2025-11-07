@@ -1,0 +1,6 @@
+node_modules/
+*.log
+.DS_Store
+
+# Keep dist/ for GitHub Actions - the bundled code needs to be committed
+# dist/

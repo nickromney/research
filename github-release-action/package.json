@@ -1,0 +1,36 @@
+{
+  "name": "github-release-version-checker-action",
+  "version": "1.0.0",
+  "description": "A GitHub Action to check release versions against configurable expiry policies",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "bundle": "npm run build && ncc build dist/main.js -o dist --source-map --license licenses.txt",
+    "test": "echo \"No tests yet\" && exit 0",
+    "all": "npm run bundle"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nickromney/research.git"
+  },
+  "keywords": [
+    "github",
+    "action",
+    "release",
+    "version",
+    "checker"
+  ],
+  "author": "nickromney",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.10.1",
+    "@actions/github": "^6.0.0",
+    "semver": "^7.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/semver": "^7.5.6",
+    "@vercel/ncc": "^0.38.1",
+    "typescript": "^5.3.3"
+  }
+}
