@@ -12,3 +12,78 @@ Features:
 - Days-based policy (e.g., runners must update within 30 days)
 - Version-based policy (e.g., Kubernetes N-3 minor version support)
 - Multiple output formats for GitHub Actions
+
+## Azure API Management Research Projects (2025-11-07)
+
+A comprehensive set of research projects focused on learning Azure API Management (APIM) with an emphasis on security, cost-effectiveness, and practical implementation patterns.
+
+### [apim-internal-mode-network-security](./apim-internal-mode-network-security/)
+
+Research focused on securing Azure APIM at the infrastructure level by deploying in "Internal" mode with VNet integration.
+
+Topics:
+- APIM network connectivity modes (External, Internal, None)
+- VNet integration and subnet planning
+- DNS configuration for internal endpoints
+- NSG requirements and security rules
+- Integration with Application Gateway and Azure Firewall
+- Private endpoints vs service endpoints
+- Cost analysis across different deployment models
+
+### [apim-policy-security](./apim-policy-security/)
+
+Research focused on securing individual API policies using authentication, authorization, rate limiting, and other security patterns.
+
+Topics:
+- Authentication policies (API keys, OAuth 2.0, JWT validation)
+- Rate limiting and quota management
+- IP filtering and geofencing
+- Request/response validation
+- CORS configuration
+- Header security and manipulation
+- Circuit breaker and retry patterns
+- Backend security and error handling
+
+### [apim-multitenant-access](./apim-multitenant-access/)
+
+Research focused on configuring APIM to support multiple development teams or projects with segmented access using Products, Subscriptions, and Groups.
+
+Topics:
+- APIM organization model (Products, APIs, Groups, Users)
+- Multi-project access segmentation patterns
+- Azure AD integration for user management
+- Subscription and API key management
+- Developer portal customization per tenant
+- Product-level policies for isolation
+- Monitoring and analytics per project
+- Real-world multi-tenant scenarios
+
+### [apim-developer-tier-patterns](./apim-developer-tier-patterns/)
+
+Research focused on cost-effective learning strategies for Azure APIM, including Developer tier usage and Pluralsight sandbox optimization.
+
+Topics:
+- APIM tier comparison and cost analysis
+- Developer tier capabilities and limitations
+- Deploy-test-destroy patterns for cost savings
+- Pluralsight sandbox strategies (4-hour sessions)
+- Infrastructure as Code templates (Bicep/Terraform)
+- Free/cheap backend services for testing
+- Cost monitoring and billing alerts
+- Learning path with cost optimization
+- Avoiding expensive samples and patterns
+
+### [apim-backend-integration](./apim-backend-integration/)
+
+Research focused on integrating APIM with various backend services including Azure Functions, AKS, App Services, and Container Apps.
+
+Topics:
+- Backend integration patterns (Functions, AKS, App Service, Container Apps)
+- Backend authentication methods (Managed Identity, certificates, OAuth)
+- Service discovery and DNS configuration
+- Load balancing and backend pools
+- Circuit breaker and retry policies
+- Request/response transformation
+- Performance optimization and caching
+- Health monitoring and observability
+- Multi-backend routing scenarios
