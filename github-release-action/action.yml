@@ -1,0 +1,58 @@
+name: 'GitHub Release Version Checker'
+description: 'Check GitHub release versions against configurable expiry policies'
+author: 'nickromney'
+branding:
+  icon: 'check-circle'
+  color: 'green'
+
+inputs:
+  repository:
+    description: 'GitHub repository to check (format: owner/repo)'
+    required: true
+  current-version:
+    description: 'Your current version to check against latest release'
+    required: false
+  policy-type:
+    description: 'Policy type: "days" or "version"'
+    required: false
+    default: 'days'
+  days-warning:
+    description: 'Days threshold for warning status (days-based policy)'
+    required: false
+    default: '12'
+  days-critical:
+    description: 'Days threshold for critical status (days-based policy)'
+    required: false
+    default: '20'
+  days-expired:
+    description: 'Days threshold for expired status (days-based policy)'
+    required: false
+    default: '30'
+  version-window:
+    description: 'Version window for support (version-based policy, e.g., "3" for N-3)'
+    required: false
+    default: '3'
+  github-token:
+    description: 'GitHub token for API authentication (uses GITHUB_TOKEN by default)'
+    required: false
+    default: ${{ github.token }}
+  fail-on-expired:
+    description: 'Whether to fail the action if version is expired'
+    required: false
+    default: 'true'
+
+outputs:
+  status:
+    description: 'Version status: current, warning, critical, or expired'
+  latest-version:
+    description: 'Latest release version from the repository'
+  latest-release-date:
+    description: 'Date of the latest release'
+  days-behind:
+    description: 'Number of days behind the latest release'
+  versions-behind:
+    description: 'Number of versions behind the latest release'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
