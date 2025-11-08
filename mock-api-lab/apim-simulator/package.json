@@ -1,0 +1,14 @@
+{
+  "name": "apim-simulator",
+  "version": "1.0.0",
+  "description": "Azure APIM simulator with rate limiting and subscription keys",
+  "main": "apim-simulator.js",
+  "scripts": {
+    "start": "node apim-simulator.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.6.2",
+    "body-parser": "^1.20.2"
+  }
+}

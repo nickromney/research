@@ -16,6 +16,91 @@ There's no simulator for Azure API Management, so this lab fills that gap by tea
 **Cost**: Free (runs locally)
 **Time**: 3-4 hours for full lab
 
+## Quick Start
+
+### Clone and Go
+
+```bash
+# Clone the repository
+git clone https://github.com/nickromney/research.git
+cd research/mock-api-lab
+
+# Run the install script
+./install.sh
+
+# Start both servers (in separate terminals)
+# Terminal 1:
+cd oauth-server && npm start
+
+# Terminal 2:
+cd apim-simulator && npm start
+
+# Or start both with concurrently:
+npm run start:all
+
+# Run tests (in a new terminal)
+cd scripts
+./test-api.sh
+
+# Run interactive demo
+./demo.sh
+
+# Run load test
+./load-test.sh
+```
+
+### What's Included
+
+This repository contains complete working code:
+
+```
+mock-api-lab/
+├── install.sh                 # Automated setup script
+├── package.json              # Root dependencies
+├── oauth-server/             # Mock OAuth 2.0 server
+│   ├── package.json
+│   └── oauth-server.js       # Complete OAuth implementation
+├── apim-simulator/           # APIM gateway simulator
+│   ├── package.json
+│   └── apim-simulator.js     # Rate limiting + subscription keys
+└── scripts/                  # Testing scripts
+    ├── test-api.sh           # Automated test suite
+    ├── load-test.sh          # Load testing
+    └── demo.sh               # Interactive demo
+```
+
+### Services
+
+Once started, you'll have:
+
+- **OAuth Server**: `http://localhost:3001`
+  - Client credentials: `application` / `secret`
+  - Test users: `user1/password1`, `admin/admin123`
+
+- **APIM Simulator**: `http://localhost:8080`
+  - Subscription keys: `primary-key-12345`, `secondary-key-67890`
+  - Rate limiting: 100 req/min (primary), 10 req/min (secondary)
+
+### Quick Tests
+
+```bash
+# Test OAuth server
+curl http://localhost:3001/health
+
+# Get OAuth token
+curl -X POST http://localhost:3001/oauth/token \
+  -d 'grant_type=client_credentials' \
+  -d 'client_id=application' \
+  -d 'client_secret=secret'
+
+# Test APIM (will fail without key)
+curl http://localhost:8080/api/get
+
+# Test APIM (with valid key)
+curl -H 'Ocp-Apim-Subscription-Key: primary-key-12345' \
+  http://localhost:8080/api/get
+```
+
 ## Table of Contents
 
 1. [Lab Setup](#lab-setup)

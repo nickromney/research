@@ -1,0 +1,25 @@
+{
+  "name": "mock-api-lab",
+  "version": "1.0.0",
+  "description": "Hands-on lab for building and testing APIs locally",
+  "scripts": {
+    "install-all": "npm install && cd oauth-server && npm install && cd ../apim-simulator && npm install",
+    "start:oauth": "cd oauth-server && npm start",
+    "start:apim": "cd apim-simulator && npm start",
+    "start:all": "concurrently \"npm run start:oauth\" \"npm run start:apim\"",
+    "test": "cd scripts && ./test-api.sh",
+    "load-test": "cd scripts && ./load-test.sh"
+  },
+  "keywords": [
+    "api",
+    "oauth2",
+    "apim",
+    "mock",
+    "learning"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
