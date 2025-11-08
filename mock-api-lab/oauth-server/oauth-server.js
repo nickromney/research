@@ -7,18 +7,36 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
-// In-memory storage (for demo only!)
+// ============================================================================
+// WARNING: FOR LEARNING/TESTING ONLY - DO NOT USE IN PRODUCTION!
+// ============================================================================
+// This server uses hardcoded credentials and in-memory storage.
+// - Passwords are stored in plaintext
+// - No encryption or hashing
+// - Data is lost on restart
+// - No input validation
+//
+// NEVER use these patterns in production code!
+// For production, use:
+// - Encrypted/hashed passwords (bcrypt, argon2)
+// - Persistent database storage
+// - Proper input validation and sanitization
+// - Environment variables for secrets
+// ============================================================================
+
+// In-memory storage (INSECURE - FOR DEMO/LEARNING ONLY!)
 const clients = [
   {
     id: 'application',
     clientId: 'application',
-    clientSecret: 'secret',
+    clientSecret: 'secret',  // INSECURE: Hardcoded secret for demo only!
     grants: ['client_credentials', 'password'],
   },
 ];
 
 const tokens = [];
 const users = [
+  // INSECURE: Plaintext passwords for demo/testing only!
   {username: 'user1', password: 'password1'},
   {username: 'admin', password: 'admin123'},
 ];

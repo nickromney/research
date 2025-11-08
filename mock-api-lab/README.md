@@ -81,6 +81,25 @@ Once started, you'll have:
   - Subscription keys: `primary-key-12345`, `secondary-key-67890`
   - Rate limiting: 100 req/min (primary), 10 req/min (secondary)
 
+### ⚠️ Security Warning
+
+**This is a learning and testing environment ONLY. DO NOT use in production!**
+
+- Hardcoded credentials (OAuth secrets, API keys, passwords)
+- Plaintext password storage
+- No encryption or hashing
+- In-memory storage (data lost on restart)
+- No input validation or sanitization
+- SSRF vulnerability in backend query parameter
+
+These are intentional for learning purposes. For production:
+- Use environment variables for secrets
+- Hash/encrypt passwords (bcrypt, argon2)
+- Use persistent databases
+- Implement proper input validation
+- Whitelist backend URLs
+- Follow security best practices
+
 ### Quick Tests
 
 ```bash

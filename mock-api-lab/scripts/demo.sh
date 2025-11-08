@@ -1,10 +1,12 @@
 #!/bin/bash
+set -euo pipefail
 # demo.sh - Interactive demo of the mock API lab
 
 # Colors
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
+RED='\033[0;31m'
 NC='\033[0m'
 
 OAUTH_URL="http://localhost:3001"
@@ -33,16 +35,29 @@ demo_oauth() {
     echo -e "${GREEN}  -d 'client_secret=secret'${NC}"
     echo ""
 
-    TOKEN_RESPONSE=$(curl -s -X POST $OAUTH_URL/oauth/token \
+    # Get token and HTTP status code
+    TOKEN_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST $OAUTH_URL/oauth/token \
         -d 'grant_type=client_credentials' \
         -d 'client_id=application' \
         -d 'client_secret=secret')
 
+    # Split response and status code
+    HTTP_BODY=$(echo "$TOKEN_RESPONSE" | sed '$d')
+    HTTP_STATUS=$(echo "$TOKEN_RESPONSE" | tail -n1)
+
     echo "Response:"
-    echo "$TOKEN_RESPONSE" | jq
+    if [[ "$HTTP_STATUS" != "200" ]] || [[ -z "$HTTP_BODY" ]]; then
+        echo -e "${RED}Error: Failed to get token from OAuth server (HTTP $HTTP_STATUS).${NC}"
+        echo -e "${YELLOW}Make sure the OAuth server is running on port 3001${NC}"
+        echo "$HTTP_BODY"
+        pause
+        return
+    fi
+
+    echo "$HTTP_BODY" | jq
     pause
 
-    TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r '.accessToken')
+    TOKEN=$(echo "$HTTP_BODY" | jq -r '.accessToken')
 
     echo ""
     echo "2. Using token to access protected resource:"

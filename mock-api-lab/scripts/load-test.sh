@@ -73,7 +73,7 @@ echo "Success Rate: $success_rate%"
 if [ $rate_limited -gt 0 ]; then
     echo ""
     echo "✓ Rate limiting is working!"
-    echo "  Requests started getting rate limited after ~100 requests/minute"
+    echo "  Some requests were rate limited (HTTP 429)."
 fi
 
 echo "========================================="

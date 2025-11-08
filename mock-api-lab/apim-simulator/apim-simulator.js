@@ -119,7 +119,16 @@ app.all('/api/*', checkSubscriptionKey, rateLimit, quotaCheck, async (req, res) 
   // Extract path after /api/
   const backendPath = req.path.replace('/api/', '');
 
-  // Backend URL (default to httpbin for testing if no backend specified)
+  // WARNING: SSRF VULNERABILITY - FOR DEMO/LEARNING ONLY!
+  // The backend URL can be specified via query parameter, which allows
+  // arbitrary URL redirection (Server-Side Request Forgery).
+  // DO NOT USE IN PRODUCTION without proper URL validation/whitelisting!
+  //
+  // For production, use a whitelist of allowed backend URLs:
+  // const allowedBackends = ['https://api1.example.com', 'https://api2.example.com'];
+  // if (req.query.backend && !allowedBackends.includes(req.query.backend)) {
+  //   return res.status(400).json({error: 'Invalid backend URL'});
+  // }
   const backendUrl = req.query.backend || `https://httpbin.org/${backendPath}`;
 
   console.log(`[APIM] ${req.method} ${req.path} -> ${backendUrl}`);

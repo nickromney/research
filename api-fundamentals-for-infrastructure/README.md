@@ -387,13 +387,13 @@ Username + password encoded in Base64 (like HTTP basic auth):
 
 ```bash
 # Method 1: curl handles encoding
-curl -u username:password https://api.example.com/data
+curl -u YOUR_USERNAME:YOUR_PASSWORD https://api.example.com/data
 
 # Method 2: Manual base64 encoding
-echo -n "username:password" | base64
-# Output: dXNlcm5hbWU6cGFzc3dvcmQ=
+echo -n "YOUR_USERNAME:YOUR_PASSWORD" | base64
+# Output: WU9VUl9VU0VSTkFNRTpZT1VSX1BBU1NXT1JE
 
-curl -H "Authorization: Basic dXNlcm5hbWU6cGFzc3dvcmQ=" \
+curl -H "Authorization: Basic WU9VUl9VU0VSTkFNRTpZT1VSX1BBU1NXT1JE" \
   https://api.example.com/data
 ```
 

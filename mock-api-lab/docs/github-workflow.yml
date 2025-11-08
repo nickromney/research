@@ -201,7 +201,7 @@ jobs:
       - name: Cleanup
         if: always()
         run: |
-          # Kill background processes
+          # Kill background processes gracefully (SIGTERM), then forcefully if needed
           if [ -f mock-api-lab/oauth-server/oauth-server.pid ]; then
             kill $(cat mock-api-lab/oauth-server/oauth-server.pid) 2>/dev/null || true
           fi
@@ -210,6 +210,14 @@ jobs:
           fi
 
           # Fallback: kill by port
+          # Try graceful shutdown first (SIGTERM)
+          lsof -ti:3001 | xargs kill 2>/dev/null || true
+          lsof -ti:8080 | xargs kill 2>/dev/null || true
+
+          # Wait for graceful shutdown
+          sleep 3
+
+          # Force kill if still running (SIGKILL)
           lsof -ti:3001 | xargs kill -9 2>/dev/null || true
           lsof -ti:8080 | xargs kill -9 2>/dev/null || true
 
