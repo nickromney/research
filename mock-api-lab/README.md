@@ -18,7 +18,36 @@ There's no simulator for Azure API Management, so this lab fills that gap by tea
 
 ## Quick Start
 
-### Clone and Go
+### Option 1: Docker/Podman (Recommended)
+
+The easiest way to get started - no local Node.js dependencies needed!
+
+```bash
+# Clone the repository
+git clone https://github.com/nickromney/research.git
+cd research/mock-api-lab
+
+# Start all services with Podman Compose
+podman-compose up
+
+# Or with Docker Compose
+docker compose up
+
+# In another terminal, run tests
+cd scripts
+./test-api.sh
+./load-test.sh
+./demo.sh
+
+# Stop services
+podman-compose down
+```
+
+**See [DOCKER.md](DOCKER.md) for complete Docker/Podman guide**
+
+### Option 2: Local Installation
+
+Install and run directly on your machine:
 
 ```bash
 # Clone the repository
@@ -55,18 +84,22 @@ This repository contains complete working code:
 
 ```
 mock-api-lab/
-├── install.sh                 # Automated setup script
-├── package.json              # Root dependencies
-├── oauth-server/             # Mock OAuth 2.0 server
-│   ├── package.json
-│   └── oauth-server.js       # Complete OAuth implementation
-├── apim-simulator/           # APIM gateway simulator
-│   ├── package.json
-│   └── apim-simulator.js     # Rate limiting + subscription keys
-└── scripts/                  # Testing scripts
-    ├── test-api.sh           # Automated test suite
-    ├── load-test.sh          # Load testing
-    └── demo.sh               # Interactive demo
+├── compose.yml # Docker/Podman orchestration
+├── install.sh # Automated setup script (local)
+├── package.json # Root dependencies
+├── DOCKER.md # Docker/Podman usage guide
+├── oauth-server/ # Mock OAuth 2.0 server
+│ ├── Dockerfile # Container image
+│ ├── package.json
+│ └── oauth-server.js # Complete OAuth implementation
+├── apim-simulator/ # APIM gateway simulator
+│ ├── Dockerfile # Container image
+│ ├── package.json
+│ └── apim-simulator.js # Rate limiting + subscription keys
+└── scripts/ # Testing scripts
+ ├── test-api.sh # Automated test suite
+ ├── load-test.sh # Load testing
+ └── demo.sh # Interactive demo
 ```
 
 ### Services
@@ -74,17 +107,18 @@ mock-api-lab/
 Once started, you'll have:
 
 - **OAuth Server**: `http://localhost:3001`
-  - Client credentials: `application` / `secret`
-  - Test users: `user1/password1`, `admin/admin123`
+ - Client credentials: `application` / `secret`
+ - Test users: `user1/password1`, `admin/admin123`
 
 - **APIM Simulator**: `http://localhost:8080`
-  - Subscription keys: `primary-key-12345`, `secondary-key-67890`
-  - Rate limiting: 100 req/min (primary), 10 req/min (secondary)
+ - Subscription keys: `primary-key-12345`, `secondary-key-67890`
+ - Rate limiting: 100 req/min (primary), 10 req/min (secondary)
 
-### ⚠️ Security Warning
+### Security Warning
 
 **This is a learning and testing environment ONLY. DO NOT use in production!**
 
+**Known Security Issues:**
 - Hardcoded credentials (OAuth secrets, API keys, passwords)
 - Plaintext password storage
 - No encryption or hashing
@@ -92,15 +126,49 @@ Once started, you'll have:
 - No input validation or sanitization
 - SSRF vulnerability in backend query parameter
 
-These are intentional for learning purposes. For production:
+**Why these exist:**
+These vulnerabilities are intentional for learning purposes to demonstrate insecure patterns.
+
+**For production use:**
 - Use environment variables for secrets
 - Hash/encrypt passwords (bcrypt, argon2)
 - Use persistent databases
 - Implement proper input validation
 - Whitelist backend URLs
-- Follow security best practices
+- Use a production-grade OAuth library (e.g., `node-oidc-provider`, cloud provider services)
+- Follow OWASP security best practices
 
-### Quick Tests
+### Automated Testing
+
+Run the comprehensive test suite to validate everything is working:
+
+```bash
+cd scripts
+
+# Run all tests (12 automated tests)
+./test-api.sh
+
+# Output:
+# 12/12 tests passed
+# - OAuth server health check
+# - OAuth client credentials flow
+# - OAuth password grant flow
+# - Protected resource access
+# - APIM health check
+# - Subscription key validation
+# - Request proxying
+# - Rate limit enforcement
+
+# Run load test (rate limiting verification)
+./load-test.sh secondary-key-67890 30
+
+# Run interactive demo
+./demo.sh
+```
+
+**CI/CD**: GitHub Actions workflow runs automatically on push/PR to validate all tests.
+
+### Quick Manual Tests
 
 ```bash
 # Test OAuth server
@@ -108,16 +176,16 @@ curl http://localhost:3001/health
 
 # Get OAuth token
 curl -X POST http://localhost:3001/oauth/token \
-  -d 'grant_type=client_credentials' \
-  -d 'client_id=application' \
-  -d 'client_secret=secret'
+ -d 'grant_type=client_credentials' \
+ -d 'client_id=application' \
+ -d 'client_secret=secret'
 
 # Test APIM (will fail without key)
 curl http://localhost:8080/api/get
 
 # Test APIM (with valid key)
 curl -H 'Ocp-Apim-Subscription-Key: primary-key-12345' \
-  http://localhost:8080/api/get
+ http://localhost:8080/api/get
 ```
 
 ## Table of Contents
@@ -144,14 +212,14 @@ sudo apt update
 sudo apt install -y nodejs npm
 
 # Verify versions
-node --version  # Should be v14+
+node --version # Should be v14+
 npm --version
 
 # Command-line HTTP tools
 sudo apt install -y curl jq
 
 # Optional: Modern HTTP clients
-cargo install xh  # or
+cargo install xh # or
 pip install httpie
 
 # Optional: Bruno CLI for collections
@@ -318,21 +386,21 @@ curl http://localhost:3000/openapi.json | jq
 ```bash
 # Create a server
 curl -X POST http://localhost:3000/servers \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "web-server-01",
-    "ipAddress": "10.0.1.5",
-    "status": "running",
-    "region": "us-east-1"
-  }'
+ -H "Content-Type: application/json" \
+ -d '{
+ "name": "web-server-01",
+ "ipAddress": "10.0.1.5",
+ "status": "running",
+ "region": "us-east-1"
+ }'
 
 # Response:
 # {
-#   "id": 1,
-#   "name": "web-server-01",
-#   "ipAddress": "10.0.1.5",
-#   "status": "running",
-#   "region": "us-east-1"
+# "id": 1,
+# "name": "web-server-01",
+# "ipAddress": "10.0.1.5",
+# "status": "running",
+# "region": "us-east-1"
 # }
 
 # Get all servers
@@ -343,8 +411,8 @@ curl http://localhost:3000/servers/1 | jq
 
 # Update server
 curl -X PATCH http://localhost:3000/servers/1 \
-  -H "Content-Type: application/json" \
-  -d '{"status": "stopped"}'
+ -H "Content-Type: application/json" \
+ -d '{"status": "stopped"}'
 
 # Delete server
 curl -X DELETE http://localhost:3000/servers/1
@@ -368,26 +436,26 @@ Edit `src/application.ts` and add JWT authentication:
 ```typescript
 import {AuthenticationComponent} from '@loopback/authentication';
 import {
-  JWTAuthenticationComponent,
-  UserServiceBindings,
+ JWTAuthenticationComponent,
+ UserServiceBindings,
 } from '@loopback/authentication-jwt';
 import {DbDataSource} from './datasources';
 
 export class MockServerApiApplication extends BootMixin(
-  ServiceMixin(RepositoryMixin(RestApplication)),
+ ServiceMixin(RepositoryMixin(RestApplication)),
 ) {
-  constructor(options: ApplicationConfig = {}) {
-    super(options);
+ constructor(options: ApplicationConfig = {}) {
+ super(options);
 
-    // Mount authentication system
-    this.component(AuthenticationComponent);
-    this.component(JWTAuthenticationComponent);
+ // Mount authentication system
+ this.component(AuthenticationComponent);
+ this.component(JWTAuthenticationComponent);
 
-    // Bind datasource
-    this.dataSource(DbDataSource, UserServiceBindings.DATASOURCE_NAME);
+ // Bind datasource
+ this.dataSource(DbDataSource, UserServiceBindings.DATASOURCE_NAME);
 
-    // ... rest of your app
-  }
+ // ... rest of your app
+ }
 }
 ```
 
@@ -396,9 +464,9 @@ export class MockServerApiApplication extends BootMixin(
 ```typescript
 import {authenticate} from '@loopback/authentication';
 
-@authenticate('jwt')  // Require JWT for all methods
+@authenticate('jwt') // Require JWT for all methods
 export class ServerController {
-  // ... your controller code
+ // ... your controller code
 }
 ```
 
@@ -407,21 +475,21 @@ export class ServerController {
 ```bash
 # Login endpoint (auto-created by JWT component)
 curl -X POST http://localhost:3000/users/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "admin@example.com",
-    "password": "password"
-  }'
+ -H "Content-Type: application/json" \
+ -d '{
+ "email": "admin@example.com",
+ "password": "password"
+ }'
 
 # Response includes JWT token
 # {
-#   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+# "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 # }
 
 # Use token to access protected endpoint
 TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 curl -H "Authorization: Bearer $TOKEN" \
-  http://localhost:3000/servers
+ http://localhost:3000/servers
 ```
 
 **Note**: Full JWT setup is complex. See [LoopBack JWT Authentication Tutorial](https://loopback.io/doc/en/lb4/Authentication-tutorial.html) for complete guide.
@@ -454,108 +522,108 @@ app.use(express.urlencoded({extended: true}));
 
 // In-memory storage (for demo only!)
 const clients = [
-  {
-    id: 'application',
-    clientId: 'application',
-    clientSecret: 'secret',
-    grants: ['client_credentials', 'password'],
-  },
+ {
+ id: 'application',
+ clientId: 'application',
+ clientSecret: 'secret',
+ grants: ['client_credentials', 'password'],
+ },
 ];
 
 const tokens = [];
 const users = [
-  {username: 'user1', password: 'password1'},
+ {username: 'user1', password: 'password1'},
 ];
 
 // OAuth2 model (required by oauth2-server)
 const model = {
-  getClient: async (clientId, clientSecret) => {
-    const client = clients.find(
-      c => c.clientId === clientId && c.clientSecret === clientSecret
-    );
-    return client ? {
-      id: client.id,
-      grants: client.grants,
-    } : false;
-  },
+ getClient: async (clientId, clientSecret) => {
+ const client = clients.find(
+ c => c.clientId === clientId && c.clientSecret === clientSecret
+ );
+ return client ? {
+ id: client.id,
+ grants: client.grants,
+ } : false;
+ },
 
-  saveToken: async (token, client, user) => {
-    const savedToken = {
-      accessToken: token.accessToken,
-      accessTokenExpiresAt: token.accessTokenExpiresAt,
-      client: client,
-      user: user,
-    };
-    tokens.push(savedToken);
-    return savedToken;
-  },
+ saveToken: async (token, client, user) => {
+ const savedToken = {
+ accessToken: token.accessToken,
+ accessTokenExpiresAt: token.accessTokenExpiresAt,
+ client: client,
+ user: user,
+ };
+ tokens.push(savedToken);
+ return savedToken;
+ },
 
-  getAccessToken: async (accessToken) => {
-    return tokens.find(t => t.accessToken === accessToken);
-  },
+ getAccessToken: async (accessToken) => {
+ return tokens.find(t => t.accessToken === accessToken);
+ },
 
-  getUserFromClient: async (client) => {
-    // For client_credentials flow
-    return {id: 'service-account'};
-  },
+ getUserFromClient: async (client) => {
+ // For client_credentials flow
+ return {id: 'service-account'};
+ },
 
-  getUser: async (username, password) => {
-    const user = users.find(
-      u => u.username === username && u.password === password
-    );
-    return user || false;
-  },
+ getUser: async (username, password) => {
+ const user = users.find(
+ u => u.username === username && u.password === password
+ );
+ return user || false;
+ },
 
-  verifyScope: async (token, scope) => {
-    return true;  // Simplified for demo
-  },
+ verifyScope: async (token, scope) => {
+ return true; // Simplified for demo
+ },
 };
 
 // Create OAuth2 server instance
 const oauth = new OAuth2Server({
-  model: model,
-  accessTokenLifetime: 3600,  // 1 hour
-  allowEmptyState: true,
+ model: model,
+ accessTokenLifetime: 3600, // 1 hour
+ allowEmptyState: true,
 });
 
 // Token endpoint
 app.post('/oauth/token', async (req, res) => {
-  const request = new Request(req);
-  const response = new Response(res);
+ const request = new Request(req);
+ const response = new Response(res);
 
-  try {
-    const token = await oauth.token(request, response);
-    res.json(token);
-  } catch (err) {
-    res.status(err.code || 500).json(err);
-  }
+ try {
+ const token = await oauth.token(request, response);
+ res.json(token);
+ } catch (err) {
+ res.status(err.code || 500).json(err);
+ }
 });
 
 // Protected resource example
 app.get('/api/protected', async (req, res) => {
-  const request = new Request(req);
-  const response = new Response(res);
+ const request = new Request(req);
+ const response = new Response(res);
 
-  try {
-    const token = await oauth.authenticate(request, response);
-    res.json({
-      message: 'Success! You accessed a protected resource.',
-      user: token.user,
-    });
-  } catch (err) {
-    res.status(err.code || 500).json(err);
-  }
+ try {
+ const token = await oauth.authenticate(request, response);
+ res.json({
+ message: 'Success! You accessed a protected resource.',
+ user: token.user,
+ });
+ } catch (err) {
+ res.status(err.code || 500).json(err);
+ }
 });
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({status: 'ok'});
+ res.json({status: 'ok'});
 });
 
 const PORT = 3001;
 app.listen(PORT, () => {
-  console.log(`OAuth2 server running on http://localhost:${PORT}`);
-  console.log('Token endpoint: http://localhost:3001/oauth/token');
+ console.log(`OAuth2 server running on http://localhost:${PORT}`);
+ console.log('Token endpoint: http://localhost:3001/oauth/token');
 });
 ```
 
@@ -570,40 +638,40 @@ node oauth-server.js
 ```bash
 # 1. Client Credentials Flow (machine-to-machine)
 curl -X POST http://localhost:3001/oauth/token \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "grant_type=client_credentials" \
-  -d "client_id=application" \
-  -d "client_secret=secret"
+ -H "Content-Type: application/x-www-form-urlencoded" \
+ -d "grant_type=client_credentials" \
+ -d "client_id=application" \
+ -d "client_secret=secret"
 
 # Response:
 # {
-#   "accessToken": "4f5a...",
-#   "accessTokenExpiresAt": "2025-11-08T01:00:00.000Z",
-#   "tokenType": "Bearer"
+# "accessToken": "4f5a...",
+# "accessTokenExpiresAt": "2025-11-08T01:00:00.000Z",
+# "tokenType": "Bearer"
 # }
 
 # 2. Save token to variable
 TOKEN=$(curl -s -X POST http://localhost:3001/oauth/token \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "grant_type=client_credentials" \
-  -d "client_id=application" \
-  -d "client_secret=secret" | jq -r '.accessToken')
+ -H "Content-Type: application/x-www-form-urlencoded" \
+ -d "grant_type=client_credentials" \
+ -d "client_id=application" \
+ -d "client_secret=secret" | jq -r '.accessToken')
 
 echo "Token: $TOKEN"
 
 # 3. Use token to access protected resource
 curl -H "Authorization: Bearer $TOKEN" \
-  http://localhost:3001/api/protected
+ http://localhost:3001/api/protected
 
 # Response:
 # {
-#   "message": "Success! You accessed a protected resource.",
-#   "user": {"id": "service-account"}
+# "message": "Success! You accessed a protected resource.",
+# "user": {"id": "service-account"}
 # }
 
 # 4. Test with invalid token (should fail)
 curl -H "Authorization: Bearer invalid-token" \
-  http://localhost:3001/api/protected
+ http://localhost:3001/api/protected
 # Response: 401 Unauthorized
 ```
 
@@ -612,12 +680,12 @@ curl -H "Authorization: Bearer invalid-token" \
 ```bash
 # Password flow (user login)
 curl -X POST http://localhost:3001/oauth/token \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "grant_type=password" \
-  -d "username=user1" \
-  -d "password=password1" \
-  -d "client_id=application" \
-  -d "client_secret=secret"
+ -H "Content-Type: application/x-www-form-urlencoded" \
+ -d "grant_type=password" \
+ -d "username=user1" \
+ -d "password=password1" \
+ -d "client_id=application" \
+ -d "client_secret=secret"
 
 # Response includes access token
 ```
@@ -641,15 +709,15 @@ app.use(express.json());
 
 // Subscription key storage (APIM uses these)
 const subscriptionKeys = {
-  'primary-key-12345': {
-    name: 'Project 1 Subscription',
-    rateLimit: 100,  // requests per minute
-    quota: 10000,    // requests per month
-  },
-  'secondary-key-67890': {
-    name: 'Project 2 Subscription',
-    rateLimit: 10,
-  },
+ 'primary-key-12345': {
+ name: 'Project 1 Subscription',
+ rateLimit: 100, // requests per minute
+ quota: 10000, // requests per month
+ },
+ 'secondary-key-67890': {
+ name: 'Project 2 Subscription',
+ rateLimit: 10,
+ },
 };
 
 // Rate limiting tracker (in-memory)
@@ -657,91 +725,91 @@ const rateLimitTracker = {};
 
 // Middleware: Check subscription key
 const checkSubscriptionKey = (req, res, next) => {
-  const subKey = req.headers['ocp-apim-subscription-key'];
+ const subKey = req.headers['ocp-apim-subscription-key'];
 
-  if (!subKey || !subscriptionKeys[subKey]) {
-    return res.status(401).json({
-      error: 'Access denied',
-      message: 'Invalid subscription key',
-    });
-  }
+ if (!subKey || !subscriptionKeys[subKey]) {
+ return res.status(401).json({
+ error: 'Access denied',
+ message: 'Invalid subscription key',
+ });
+ }
 
-  req.subscription = subscriptionKeys[subKey];
-  next();
+ req.subscription = subscriptionKeys[subKey];
+ next();
 };
 
 // Middleware: Rate limiting
 const rateLimit = (req, res, next) => {
-  const subKey = req.headers['ocp-apim-subscription-key'];
-  const now = Date.now();
-  const minute = Math.floor(now / 60000);
+ const subKey = req.headers['ocp-apim-subscription-key'];
+ const now = Date.now();
+ const minute = Math.floor(now / 60000);
 
-  if (!rateLimitTracker[subKey]) {
-    rateLimitTracker[subKey] = {};
-  }
+ if (!rateLimitTracker[subKey]) {
+ rateLimitTracker[subKey] = {};
+ }
 
-  if (!rateLimitTracker[subKey][minute]) {
-    rateLimitTracker[subKey][minute] = 0;
-  }
+ if (!rateLimitTracker[subKey][minute]) {
+ rateLimitTracker[subKey][minute] = 0;
+ }
 
-  rateLimitTracker[subKey][minute]++;
+ rateLimitTracker[subKey][minute]++;
 
-  const requests = rateLimitTracker[subKey][minute];
-  const limit = req.subscription.rateLimit;
+ const requests = rateLimitTracker[subKey][minute];
+ const limit = req.subscription.rateLimit;
 
-  res.setHeader('X-RateLimit-Limit', limit);
-  res.setHeader('X-RateLimit-Remaining', Math.max(0, limit - requests));
+ res.setHeader('X-RateLimit-Limit', limit);
+ res.setHeader('X-RateLimit-Remaining', Math.max(0, limit - requests));
 
-  if (requests > limit) {
-    return res.status(429).json({
-      error: 'Rate limit exceeded',
-      message: `Limit: ${limit} requests per minute`,
-    });
-  }
+ if (requests > limit) {
+ return res.status(429).json({
+ error: 'Rate limit exceeded',
+ message: `Limit: ${limit} requests per minute`,
+ });
+ }
 
-  next();
+ next();
 };
 
 // APIM Gateway: Proxy to backend
 app.all('/api/*', checkSubscriptionKey, rateLimit, async (req, res) => {
-  // Extract path after /api/
-  const backendPath = req.path.replace('/api/', '');
+ // Extract path after /api/
+ const backendPath = req.path.replace('/api/', '');
 
-  // Backend URL (your LoopBack API)
-  const backendUrl = `http://localhost:3000/${backendPath}`;
+ // Backend URL (your LoopBack API)
+ const backendUrl = `http://localhost:3000/${backendPath}`;
 
-  console.log(`[APIM] Proxying ${req.method} ${req.path} -> ${backendUrl}`);
+ console.log(`[APIM] Proxying ${req.method} ${req.path} -> ${backendUrl}`);
 
-  try {
-    const response = await axios({
-      method: req.method,
-      url: backendUrl,
-      data: req.body,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+ try {
+ const response = await axios({
+ method: req.method,
+ url: backendUrl,
+ data: req.body,
+ headers: {
+ 'Content-Type': 'application/json',
+ },
+ });
 
-    res.status(response.status).json(response.data);
-  } catch (error) {
-    if (error.response) {
-      res.status(error.response.status).json(error.response.data);
-    } else {
-      res.status(500).json({error: 'Backend error'});
-    }
-  }
+ res.status(response.status).json(response.data);
+ } catch (error) {
+ if (error.response) {
+ res.status(error.response.status).json(error.response.data);
+ } else {
+ res.status(500).json({error: 'Backend error'});
+ }
+ }
 });
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({status: 'APIM simulator running'});
+ res.json({status: 'APIM simulator running'});
 });
 
 const PORT = 8080;
 app.listen(PORT, () => {
-  console.log(`APIM Simulator running on http://localhost:${PORT}`);
-  console.log('Gateway: http://localhost:8080/api/*');
-  console.log('Backend: http://localhost:3000/');
+ console.log(`APIM Simulator running on http://localhost:${PORT}`);
+ console.log('Gateway: http://localhost:8080/api/*');
+ console.log('Backend: http://localhost:3000/');
 });
 ```
 
@@ -770,28 +838,28 @@ curl http://localhost:8080/api/servers
 
 # With valid subscription key
 curl -H "Ocp-Apim-Subscription-Key: primary-key-12345" \
-  http://localhost:8080/api/servers
+ http://localhost:8080/api/servers
 
 # Create server through APIM gateway
 curl -X POST http://localhost:8080/api/servers \
-  -H "Ocp-Apim-Subscription-Key: primary-key-12345" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "web-server-01",
-    "ipAddress": "10.0.1.5",
-    "status": "running"
-  }'
+ -H "Ocp-Apim-Subscription-Key: primary-key-12345" \
+ -H "Content-Type: application/json" \
+ -d '{
+ "name": "web-server-01",
+ "ipAddress": "10.0.1.5",
+ "status": "running"
+ }'
 
 # Test rate limiting (run this in a loop)
 for i in {1..150}; do
-  curl -s -H "Ocp-Apim-Subscription-Key: primary-key-12345" \
-    http://localhost:8080/api/servers | jq -r '.error // "OK"'
+ curl -s -H "Ocp-Apim-Subscription-Key: primary-key-12345" \
+ http://localhost:8080/api/servers | jq -r '.error // "OK"'
 done
 # After 100 requests, you'll see: "Rate limit exceeded"
 
 # Check rate limit headers
 curl -i -H "Ocp-Apim-Subscription-Key: primary-key-12345" \
-  http://localhost:8080/api/servers | grep "X-RateLimit"
+ http://localhost:8080/api/servers | grep "X-RateLimit"
 ```
 
 ### Scenario 2: OAuth2 + APIM Gateway
@@ -803,35 +871,35 @@ Combine OAuth2 authentication with APIM gateway:
 
 // Middleware: Validate OAuth2 token
 const validateOAuthToken = async (req, res, next) => {
-  const authHeader = req.headers['authorization'];
+ const authHeader = req.headers['authorization'];
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({error: 'Missing or invalid authorization header'});
-  }
+ if (!authHeader || !authHeader.startsWith('Bearer ')) {
+ return res.status(401).json({error: 'Missing or invalid authorization header'});
+ }
 
-  const token = authHeader.substring(7);
+ const token = authHeader.substring(7);
 
-  try {
-    // Validate token with OAuth server
-    const response = await axios.get('http://localhost:3001/api/protected', {
-      headers: {Authorization: `Bearer ${token}`},
-    });
+ try {
+ // Validate token with OAuth server
+ const response = await axios.get('http://localhost:3001/api/protected', {
+ headers: {Authorization: `Bearer ${token}`},
+ });
 
-    req.user = response.data.user;
-    next();
-  } catch (error) {
-    res.status(401).json({error: 'Invalid token'});
-  }
+ req.user = response.data.user;
+ next();
+ } catch (error) {
+ res.status(401).json({error: 'Invalid token'});
+ }
 };
 
 // Protected API endpoint (OAuth + Subscription Key)
 app.all('/api/protected/*',
-  checkSubscriptionKey,
-  validateOAuthToken,
-  rateLimit,
-  async (req, res) => {
-    // Proxy to backend
-  }
+ checkSubscriptionKey,
+ validateOAuthToken,
+ rateLimit,
+ async (req, res) => {
+ // Proxy to backend
+ }
 );
 ```
 
@@ -840,14 +908,14 @@ app.all('/api/protected/*',
 ```bash
 # Get OAuth token
 TOKEN=$(curl -s -X POST http://localhost:3001/oauth/token \
-  -d "grant_type=client_credentials" \
-  -d "client_id=application" \
-  -d "client_secret=secret" | jq -r '.accessToken')
+ -d "grant_type=client_credentials" \
+ -d "client_id=application" \
+ -d "client_secret=secret" | jq -r '.accessToken')
 
 # Access API with both subscription key AND OAuth token
 curl -H "Ocp-Apim-Subscription-Key: primary-key-12345" \
-     -H "Authorization: Bearer $TOKEN" \
-     http://localhost:8080/api/protected/servers
+ -H "Authorization: Bearer $TOKEN" \
+ http://localhost:8080/api/protected/servers
 ```
 
 ---
@@ -880,15 +948,15 @@ test_count=0
 pass_count=0
 
 run_test() {
-    test_count=$((test_count + 1))
-    echo -n "Test $test_count: $1 ... "
+ test_count=$((test_count + 1))
+ echo -n "Test $test_count: $1 ... "
 
-    if eval "$2" > /dev/null 2>&1; then
-        echo -e "${GREEN}PASS${NC}"
-        pass_count=$((pass_count + 1))
-    else
-        echo -e "${RED}FAIL${NC}"
-    fi
+ if eval "$2" > /dev/null 2>&1; then
+ echo -e "${GREEN}PASS${NC}"
+ pass_count=$((pass_count + 1))
+ else
+ echo -e "${RED}FAIL${NC}"
+ fi
 }
 
 echo "========================================="
@@ -897,26 +965,26 @@ echo "========================================="
 
 # Test 1: Health check
 run_test "Health check" \
-    "curl -sf http://localhost:8080/health"
+ "curl -sf http://localhost:8080/health"
 
 # Test 2: Unauthorized access (no key)
 run_test "Reject missing subscription key" \
-    "curl -sf http://localhost:8080/api/servers && false || true"
+ "curl -sf http://localhost:8080/api/servers && false || true"
 
 # Test 3: Authorized access
 run_test "Accept valid subscription key" \
-    "curl -sf -H 'Ocp-Apim-Subscription-Key: $SUB_KEY' $BASE_URL/servers"
+ "curl -sf -H 'Ocp-Apim-Subscription-Key: $SUB_KEY' $BASE_URL/servers"
 
 # Test 4: Create server
 run_test "Create server" \
-    "curl -sf -X POST -H 'Ocp-Apim-Subscription-Key: $SUB_KEY' \
-     -H 'Content-Type: application/json' \
-     -d '{\"name\":\"test-server\",\"ipAddress\":\"10.0.1.1\",\"status\":\"running\"}' \
-     $BASE_URL/servers"
+ "curl -sf -X POST -H 'Ocp-Apim-Subscription-Key: $SUB_KEY' \
+ -H 'Content-Type: application/json' \
+ -d '{\"name\":\"test-server\",\"ipAddress\":\"10.0.1.1\",\"status\":\"running\"}' \
+ $BASE_URL/servers"
 
 # Test 5: Get servers
 run_test "List servers" \
-    "curl -sf -H 'Ocp-Apim-Subscription-Key: $SUB_KEY' $BASE_URL/servers | jq -e '. | length > 0'"
+ "curl -sf -H 'Ocp-Apim-Subscription-Key: $SUB_KEY' $BASE_URL/servers | jq -e '. | length > 0'"
 
 echo "========================================="
 echo "Results: $pass_count/$test_count tests passed"
@@ -940,7 +1008,7 @@ Create `load-test.sh`:
 BASE_URL="http://localhost:8080/api/servers"
 SUB_KEY="primary-key-12345"
 REQUESTS=200
-DELAY=0.1  # seconds between requests
+DELAY=0.1 # seconds between requests
 
 success=0
 rate_limited=0
@@ -950,34 +1018,34 @@ echo "Running load test: $REQUESTS requests"
 echo "========================================="
 
 for i in $(seq 1 $REQUESTS); do
-    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
-        -H "Ocp-Apim-Subscription-Key: $SUB_KEY" \
-        "$BASE_URL")
+ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+ -H "Ocp-Apim-Subscription-Key: $SUB_KEY" \
+ "$BASE_URL")
 
-    case $HTTP_CODE in
-        200)
-            success=$((success + 1))
-            echo -n "."
-            ;;
-        429)
-            rate_limited=$((rate_limited + 1))
-            echo -n "R"
-            ;;
-        *)
-            errors=$((errors + 1))
-            echo -n "E"
-            ;;
-    esac
+ case $HTTP_CODE in
+ 200)
+ success=$((success + 1))
+ echo -n "."
+ ;;
+ 429)
+ rate_limited=$((rate_limited + 1))
+ echo -n "R"
+ ;;
+ *)
+ errors=$((errors + 1))
+ echo -n "E"
+ ;;
+ esac
 
-    sleep $DELAY
+ sleep $DELAY
 done
 
 echo ""
 echo "========================================="
 echo "Results:"
-echo "  Success (200): $success"
-echo "  Rate Limited (429): $rate_limited"
-echo "  Errors: $errors"
+echo " Success (200): $success"
+echo " Rate Limited (429): $rate_limited"
+echo " Errors: $errors"
 echo "========================================="
 ```
 
@@ -998,11 +1066,11 @@ Useful for API design phase:
 ```javascript
 // In apim-simulator.js
 app.get('/api/mock/servers', (req, res) => {
-  // Return mock data without calling backend
-  res.json([
-    {id: 1, name: 'server-1', status: 'running'},
-    {id: 2, name: 'server-2', status: 'stopped'},
-  ]);
+ // Return mock data without calling backend
+ res.json([
+ {id: 1, name: 'server-1', status: 'running'},
+ {id: 2, name: 'server-2', status: 'stopped'},
+ ]);
 });
 ```
 
@@ -1011,61 +1079,61 @@ app.get('/api/mock/servers', (req, res) => {
 ```javascript
 // Simple circuit breaker
 class CircuitBreaker {
-  constructor(threshold = 5, timeout = 60000) {
-    this.failureCount = 0;
-    this.threshold = threshold;
-    this.timeout = timeout;
-    this.state = 'CLOSED';  // CLOSED, OPEN, HALF_OPEN
-    this.nextAttempt = Date.now();
-  }
+ constructor(threshold = 5, timeout = 60000) {
+ this.failureCount = 0;
+ this.threshold = threshold;
+ this.timeout = timeout;
+ this.state = 'CLOSED'; // CLOSED, OPEN, HALF_OPEN
+ this.nextAttempt = Date.now();
+ }
 
-  async call(fn) {
-    if (this.state === 'OPEN') {
-      if (Date.now() < this.nextAttempt) {
-        throw new Error('Circuit breaker is OPEN');
-      }
-      this.state = 'HALF_OPEN';
-    }
+ async call(fn) {
+ if (this.state === 'OPEN') {
+ if (Date.now() < this.nextAttempt) {
+ throw new Error('Circuit breaker is OPEN');
+ }
+ this.state = 'HALF_OPEN';
+ }
 
-    try {
-      const result = await fn();
-      this.onSuccess();
-      return result;
-    } catch (error) {
-      this.onFailure();
-      throw error;
-    }
-  }
+ try {
+ const result = await fn();
+ this.onSuccess();
+ return result;
+ } catch (error) {
+ this.onFailure();
+ throw error;
+ }
+ }
 
-  onSuccess() {
-    this.failureCount = 0;
-    this.state = 'CLOSED';
-  }
+ onSuccess() {
+ this.failureCount = 0;
+ this.state = 'CLOSED';
+ }
 
-  onFailure() {
-    this.failureCount++;
-    if (this.failureCount >= this.threshold) {
-      this.state = 'OPEN';
-      this.nextAttempt = Date.now() + this.timeout;
-    }
-  }
+ onFailure() {
+ this.failureCount++;
+ if (this.failureCount >= this.threshold) {
+ this.state = 'OPEN';
+ this.nextAttempt = Date.now() + this.timeout;
+ }
+ }
 }
 
 // Usage in APIM simulator
 const breaker = new CircuitBreaker();
 
 app.all('/api/*', async (req, res) => {
-  try {
-    const result = await breaker.call(async () => {
-      // Call backend
-      return await axios({...});
-    });
-    res.json(result.data);
-  } catch (error) {
-    if (error.message === 'Circuit breaker is OPEN') {
-      res.status(503).json({error: 'Service temporarily unavailable'});
-    }
-  }
+ try {
+ const result = await breaker.call(async () => {
+ // Call backend
+ return await axios({...});
+ });
+ res.json(result.data);
+ } catch (error) {
+ if (error.message === 'Circuit breaker is OPEN') {
+ res.status(503).json({error: 'Service temporarily unavailable'});
+ }
+ }
 });
 ```
 
@@ -1074,28 +1142,28 @@ app.all('/api/*', async (req, res) => {
 ```javascript
 // Transform request before sending to backend
 app.all('/api/v2/*', async (req, res) => {
-  // Add timestamp to all requests
-  const modifiedBody = {
-    ...req.body,
-    requestedAt: new Date().toISOString(),
-  };
+ // Add timestamp to all requests
+ const modifiedBody = {
+ ...req.body,
+ requestedAt: new Date().toISOString(),
+ };
 
-  const response = await axios({
-    method: req.method,
-    url: backendUrl,
-    data: modifiedBody,
-  });
+ const response = await axios({
+ method: req.method,
+ url: backendUrl,
+ data: modifiedBody,
+ });
 
-  // Transform response
-  const transformedResponse = {
-    data: response.data,
-    metadata: {
-      version: 'v2',
-      timestamp: new Date().toISOString(),
-    },
-  };
+ // Transform response
+ const transformedResponse = {
+ data: response.data,
+ metadata: {
+ version: 'v2',
+ timestamp: new Date().toISOString(),
+ },
+ };
 
-  res.json(transformedResponse);
+ res.json(transformedResponse);
 });
 ```
 
@@ -1114,13 +1182,13 @@ npm install -g json-server
 # Create db.json
 cat > db.json << 'EOF'
 {
-  "servers": [
-    {"id": 1, "name": "web-01", "status": "running"},
-    {"id": 2, "name": "db-01", "status": "running"}
-  ],
-  "users": [
-    {"id": 1, "name": "admin", "role": "admin"}
-  ]
+ "servers": [
+ {"id": 1, "name": "web-01", "status": "running"},
+ {"id": 2, "name": "db-01", "status": "running"}
+ ],
+ "users": [
+ {"id": 1, "name": "admin", "role": "admin"}
+ ]
 }
 EOF
 
@@ -1128,11 +1196,11 @@ EOF
 json-server --watch db.json --port 3000
 
 # Auto-generates full REST API:
-# GET    /servers
-# GET    /servers/1
-# POST   /servers
-# PUT    /servers/1
-# PATCH  /servers/1
+# GET /servers
+# GET /servers/1
+# POST /servers
+# PUT /servers/1
+# PATCH /servers/1
 # DELETE /servers/1
 ```
 
@@ -1163,25 +1231,25 @@ prism mock openapi.yaml
 cat > openapi.yaml << 'EOF'
 openapi: 3.0.0
 info:
-  title: Server API
-  version: 1.0.0
+ title: Server API
+ version: 1.0.0
 paths:
-  /servers:
-    get:
-      responses:
-        '200':
-          description: List of servers
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: integer
-                    name:
-                      type: string
+ /servers:
+ get:
+ responses:
+ '200':
+ description: List of servers
+ content:
+ application/json:
+ schema:
+ type: array
+ items:
+ type: object
+ properties:
+ id:
+ type: integer
+ name:
+ type: string
 EOF
 
 prism mock openapi.yaml
@@ -1198,19 +1266,19 @@ java -jar wiremock-standalone-2.35.0.jar --port 8080
 
 # Create stub
 curl -X POST http://localhost:8080/__admin/mappings \
-  -d '{
-    "request": {
-      "method": "GET",
-      "url": "/api/servers"
-    },
-    "response": {
-      "status": 200,
-      "body": "[{\"id\":1,\"name\":\"server-1\"}]",
-      "headers": {
-        "Content-Type": "application/json"
-      }
-    }
-  }'
+ -d '{
+ "request": {
+ "method": "GET",
+ "url": "/api/servers"
+ },
+ "response": {
+ "status": 200,
+ "body": "[{\"id\":1,\"name\":\"server-1\"}]",
+ "headers": {
+ "Content-Type": "application/json"
+ }
+ }
+ }'
 
 # Test
 curl http://localhost:8080/api/servers
@@ -1246,11 +1314,11 @@ curl http://localhost:8080/api/servers
 Simulate this architecture:
 ```
 Client
-  ↓ (subscription key + OAuth token)
+ ↓ (subscription key + OAuth token)
 APIM Simulator (rate limiting, policies)
-  ↓
+ ↓
 LoopBack Backend (JWT validation)
-  ↓
+ ↓
 In-memory database
 ```
 
@@ -1261,6 +1329,17 @@ Test:
 - Error handling
 
 ---
+
+## Documentation
+
+### Getting Started
+- **[DOCKER.md](DOCKER.md)** - Complete Docker/Podman usage guide
+- **[docs/GITHUB_ACTIONS.md](docs/GITHUB_ACTIONS.md)** - CI/CD workflow documentation
+- **[scripts/README.md](scripts/README.md)** - Testing scripts guide
+
+### Service Documentation
+- **[oauth-server/README.md](oauth-server/README.md)** - OAuth 2.0 server details
+- **[apim-simulator/README.md](apim-simulator/README.md)** - APIM simulator details
 
 ## Resources and References
 
@@ -1285,6 +1364,12 @@ Test:
 - [Bruno](https://www.usebruno.com/)
 - [HTTPie](https://httpie.io/)
 
+### Container Technologies
+- [Docker Documentation](https://docs.docker.com/)
+- [Podman Documentation](https://docs.podman.io/)
+- [Docker Compose](https://docs.docker.com/compose/)
+- [Podman Compose](https://github.com/containers/podman-compose)
+
 ---
 
 ## Next Steps
@@ -1302,8 +1387,10 @@ Test:
 
 ## Status
 
-**Status**: 🟢 Ready for Use
-**Last Updated**: 2025-11-07
+**Status**: Ready for Use
+**Last Updated**: 2025-11-09
 **Difficulty**: Intermediate
 **Estimated Time**: 3-4 hours
-**Prerequisites**: Node.js, basic command-line skills
+**Prerequisites**: Docker/Podman OR Node.js, basic command-line skills
+**Tests**: 12/12 passing (automated test suite)
+**CI/CD**: GitHub Actions enabled

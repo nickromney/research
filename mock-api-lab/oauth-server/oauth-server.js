@@ -1,5 +1,5 @@
 const express = require('express');
-const OAuth2Server = require('oauth2-server');
+const OAuth2Server = require('@node-oauth/oauth2-server');
 const Request = OAuth2Server.Request;
 const Response = OAuth2Server.Response;
 

@@ -1,25 +1,13 @@
 # GitHub Actions Workflow
 
-This directory contains the GitHub Actions workflow for automated testing of the mock-api-lab.
+The Mock API Lab includes a comprehensive GitHub Actions workflow for automated testing.
 
-## Installation
+## Status
 
-Due to GitHub permissions, the workflow file needs to be manually added to the repository after the PR is merged.
-
-### Steps to Add Workflow
-
-1. **Copy the workflow file**:
-   ```bash
-   mkdir -p .github/workflows
-   cp mock-api-lab/docs/github-workflow.yml .github/workflows/mock-api-lab.yml
-   ```
-
-2. **Commit and push**:
-   ```bash
-   git add .github/workflows/mock-api-lab.yml
-   git commit -m "Add GitHub Actions workflow for mock-api-lab"
-   git push
-   ```
+✅ **Workflow Installed**: `.github/workflows/mock-api-lab.yml`
+✅ **Triggers**: Push to `mock-api-lab/**`, PRs, and manual dispatch
+✅ **Tests**: 12 automated tests across OAuth and APIM components
+✅ **Node.js Versions**: 18.x and 20.x
 
 ## Workflow Features
 
@@ -54,19 +42,15 @@ Once the workflow is installed, you can run it manually:
 
 ## Workflow File Location
 
-The complete workflow file is available at:
-```
-mock-api-lab/docs/github-workflow.yml
-```
-
-Copy this to:
+The workflow is installed at:
 ```
 .github/workflows/mock-api-lab.yml
 ```
 
-## Why Manual Installation?
-
-GitHub Apps (including Claude Code) require special `workflows` permission to create or modify workflow files. This is a security feature to prevent unauthorized workflow modifications.
+A reference copy is also available at:
+```
+mock-api-lab/docs/github-workflow.yml
+```
 
 ## Testing Without GitHub Actions
 

@@ -1,0 +1,80 @@
+# Compose configuration for Mock API Lab
+# Works with both podman-compose and docker compose
+#
+# Services:
+#   - oauth-server: Mock OAuth 2.0 server (port 3001)
+#   - apim-simulator: APIM gateway simulator with rate limiting (port 8080)
+#
+# Usage:
+#   podman-compose up                    # Start all services
+#   podman-compose up oauth-server       # Start only OAuth server
+#   podman-compose up apim-simulator     # Start only APIM simulator
+#   podman-compose down                  # Stop all services
+#
+# Testing:
+#   # After starting services
+#   cd scripts && ./test-api.sh          # Run automated tests
+#   cd scripts && ./load-test.sh         # Run load tests
+#   cd scripts && ./demo.sh              # Interactive demo
+#
+# Access:
+#   - OAuth Server: http://localhost:3001
+#     - Health: http://localhost:3001/health
+#     - Token endpoint: http://localhost:3001/oauth/token
+#     - Protected resource: http://localhost:3001/api/protected
+#     - Credentials: client_id=application, client_secret=secret
+#     - Test users: user1/password1, admin/admin123
+#
+#   - APIM Simulator: http://localhost:8080
+#     - Health: http://localhost:8080/health
+#     - API Gateway: http://localhost:8080/api/*
+#     - Stats: http://localhost:8080/stats
+#     - Subscription keys: primary-key-12345, secondary-key-67890
+#     - Rate limits: 100 req/min (primary), 10 req/min (secondary)
+
+services:
+  oauth-server:
+    build:
+      context: ./oauth-server
+      dockerfile: Dockerfile
+    image: mock-api-lab-oauth-server:latest
+    container_name: mock-api-lab-oauth-server
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    networks:
+      - mock-api-lab
+
+  apim-simulator:
+    build:
+      context: ./apim-simulator
+      dockerfile: Dockerfile
+    image: mock-api-lab-apim-simulator:latest
+    container_name: mock-api-lab-apim-simulator
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=development
+      - OAUTH_SERVER_URL=http://oauth-server:3001
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8080/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    depends_on:
+      oauth-server:
+        condition: service_healthy
+    networks:
+      - mock-api-lab
+
+networks:
+  mock-api-lab:
+    driver: bridge

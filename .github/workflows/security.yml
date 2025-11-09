@@ -1,0 +1,75 @@
+name: Security Scanning
+
+on:
+  push:
+    branches-ignore:
+      - main
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: '0 0 * * 1' # Weekly on Monday
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  npm-audit-mock-api-lab:
+    name: npm Audit - Mock API Lab
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            mock-api-lab/package-lock.json
+            mock-api-lab/oauth-server/package-lock.json
+            mock-api-lab/apim-simulator/package-lock.json
+
+      - name: Install mock-api-lab dependencies
+        working-directory: mock-api-lab
+        run: npm ci
+
+      - name: Install oauth-server dependencies
+        working-directory: mock-api-lab/oauth-server
+        run: npm ci
+
+      - name: Install apim-simulator dependencies
+        working-directory: mock-api-lab/apim-simulator
+        run: npm ci
+
+      - name: Run npm audit on oauth-server
+        working-directory: mock-api-lab/oauth-server
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+      - name: Run npm audit on apim-simulator
+        working-directory: mock-api-lab/apim-simulator
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+  npm-audit-github-release-action:
+    name: npm Audit - GitHub Release Action
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: github-release-action/package-lock.json
+
+      - name: Install dependencies
+        working-directory: github-release-action
+        run: npm ci
+
+      - name: Run npm audit
+        working-directory: github-release-action
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
