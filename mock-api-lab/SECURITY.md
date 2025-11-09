@@ -6,7 +6,7 @@ This is a **learning and testing environment** designed to help infrastructure e
 
 ## Known Security Vulnerabilities
 
-### 1. Dependencies (RESOLVED )
+### 1. Dependencies (RESOLVED)
 
 **Package**: `@node-oauth/oauth2-server@5.2.1`
 **Status**: No known vulnerabilities

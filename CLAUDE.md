@@ -105,7 +105,7 @@ cd scripts && ./load-test.sh
 cd scripts && ./demo.sh
 ```
 
-**Important**: The oauth2-server dependency requires version 3.1.1 (not 4.x). If you encounter dependency errors, ensure `oauth-server/package.json` specifies `"oauth2-server": "^3.1.1"`.
+**Important**: The OAuth 2.0 server now uses `@node-oauth/oauth2-server` version 5.2.1 (the actively maintained fork). If you encounter dependency errors, ensure `oauth-server/package.json` specifies `"@node-oauth/oauth2-server": "^5.2.1"`.
 
 **Architecture**: The lab consists of three independent components:
 

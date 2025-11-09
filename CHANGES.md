@@ -36,7 +36,6 @@ Created a complete containerized environment for running the Mock API Lab withou
 - `mock-api-lab/oauth-server/Dockerfile` - Container image for OAuth server
 - `mock-api-lab/apim-simulator/Dockerfile` - Container image for APIM simulator
 - `mock-api-lab/DOCKER.md` - Comprehensive Docker/Podman usage guide
-- `mock-api-lab/.dockerignore` - Root-level Docker ignore rules
 - `mock-api-lab/oauth-server/.dockerignore` - OAuth server Docker ignore rules
 - `mock-api-lab/apim-simulator/.dockerignore` - APIM simulator Docker ignore rules
 

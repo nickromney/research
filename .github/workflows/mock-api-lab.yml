@@ -211,15 +211,15 @@ jobs:
 
           # Fallback: kill by port
           # Try graceful shutdown first (SIGTERM)
-          lsof -ti:3001 | xargs kill 2>/dev/null || true
-          lsof -ti:8080 | xargs kill 2>/dev/null || true
+          lsof -ti:3001 | xargs -r -n1 kill 2>/dev/null || true
+          lsof -ti:8080 | xargs -r -n1 kill 2>/dev/null || true
 
           # Wait for graceful shutdown
           sleep 3
 
           # Force kill if still running (SIGKILL)
-          lsof -ti:3001 | xargs kill -9 2>/dev/null || true
-          lsof -ti:8080 | xargs kill -9 2>/dev/null || true
+          lsof -ti:3001 | xargs -r -n1 kill -9 2>/dev/null || true
+          lsof -ti:8080 | xargs -r -n1 kill -9 2>/dev/null || true
 
       - name: Upload test results
         if: always()
