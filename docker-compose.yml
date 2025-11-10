@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  # Rails Application
+  rails-app:
+    build:
+      context: ./rails-server-manager
+      dockerfile: Dockerfile
+    container_name: rails-server-manager
+    ports:
+      - "3000:3000"
+    environment:
+      - RAILS_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@rails-db:5432/server_manager_development
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_HOST=rails-db
+      - SECRET_KEY_BASE=development_secret_key_base_minimum_30_characters_long
+      - DEVISE_SECRET_KEY=development_devise_secret_key_minimum_30_chars
+    depends_on:
+      rails-db:
+        condition: service_healthy
+    networks:
+      - server-manager-network
+    volumes:
+      - ./rails-server-manager:/rails
+      - rails-gems:/usr/local/bundle
+
+  rails-db:
+    image: postgres:16-alpine
+    container_name: rails-postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=server_manager_development
+    ports:
+      - "5432:5432"
+    volumes:
+      - rails-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - server-manager-network
+
+  # Laravel Application
+  laravel-app:
+    build:
+      context: ./laravel-server-manager
+      dockerfile: Dockerfile
+    container_name: laravel-server-manager
+    ports:
+      - "8080:80"
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - APP_KEY=base64:7QVj9MFQO8xN2GkV5j9F5i8W8B8V8J8O8X8N8G8K8V8=
+      - DB_CONNECTION=pgsql
+      - DB_HOST=laravel-db
+      - DB_PORT=5432
+      - DB_DATABASE=server_manager
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+    depends_on:
+      laravel-db:
+        condition: service_healthy
+    networks:
+      - server-manager-network
+    volumes:
+      - ./laravel-server-manager:/var/www/html
+
+  laravel-db:
+    image: postgres:16-alpine
+    container_name: laravel-postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=server_manager
+    ports:
+      - "5433:5432"
+    volumes:
+      - laravel-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - server-manager-network
+
+networks:
+  server-manager-network:
+    driver: bridge
+
+volumes:
+  rails-postgres-data:
+  laravel-postgres-data:
+  rails-gems:

@@ -1,0 +1,123 @@
+<div class="row">
+  <div class="col-12">
+    <h1 class="mb-4">Dashboard</h1>
+  </div>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-3">
+    <div class="card text-white bg-primary">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-hdd-network"></i> Servers</h5>
+        <h2><%= @online_servers %> / <%= @total_servers %></h2>
+        <p class="mb-0">Online</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card text-white bg-success">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-gear"></i> Services</h5>
+        <h2><%= @running_services %> / <%= @total_services %></h2>
+        <p class="mb-0">Running</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card text-white bg-info">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-folder"></i> Projects</h5>
+        <h2><%= @projects.count %></h2>
+        <p class="mb-0">Total Projects</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card text-white bg-warning">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-arrow-repeat"></i> Renewals</h5>
+        <h2><%= @pending_renewals %></h2>
+        <p class="mb-0">Pending</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Projects</h5>
+      </div>
+      <div class="card-body">
+        <% if @projects.any? %>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Servers</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @projects.each do |project| %>
+                <tr>
+                  <td><%= link_to project.name, project %></td>
+                  <td><%= project.servers.count %></td>
+                  <td>
+                    <% summary = project.servers_status_summary %>
+                    <%= status_badge('online') if summary[:online] > 0 %>
+                    <%= summary[:online] %> / <%= project.servers.count %>
+                  </td>
+                  <td>
+                    <%= link_to "View", project, class: "btn btn-sm btn-primary" %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        <% else %>
+          <p class="text-muted">No projects yet. <%= link_to "Create one", new_project_path %>!</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Recent Servers</h5>
+      </div>
+      <div class="card-body">
+        <% if @recent_servers.any? %>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Project</th>
+                <th>Status</th>
+                <th>Last Checked</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @recent_servers.each do |server| %>
+                <tr>
+                  <td><%= link_to server.name, server %></td>
+                  <td><%= server.project.name %></td>
+                  <td><%= status_badge(server.status) %></td>
+                  <td><%= time_ago_or_never(server.last_checked_at) %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        <% else %>
+          <p class="text-muted">No servers yet.</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
