@@ -1,6 +1,6 @@
-# Ruby on Rails 9 vs Laravel 11: Server Management Application Comparison
+# Ruby on Rails 8 vs Laravel 11: Server Management Application Comparison
 
-A comprehensive, fully-featured server management application built in both **Ruby on Rails 9** and **Laravel 11** for direct comparison. This is far beyond a simple "Hello World" or todo app - it's a production-ready system for managing virtual machines, monitoring services, and automating SSL certificate renewals.
+A comprehensive, fully-featured server management application built in both **Ruby on Rails 8** and **Laravel 11** for direct comparison. This is far beyond a simple "Hello World" or todo app - it's a production-ready system for managing virtual machines, monitoring services, and automating SSL certificate renewals.
 
 ## 🎯 Project Overview
 
@@ -129,7 +129,7 @@ Regular User 2:
 
 ## 📊 Framework Comparison
 
-### Ruby on Rails 9
+### Ruby on Rails 8
 
 **Strengths:**
 - **Convention over Configuration** - Minimal boilerplate, intuitive structure
@@ -140,8 +140,8 @@ Regular User 2:
 - **Developer Happiness** - Beautiful, readable code with Ruby's expressiveness
 
 **Technology Stack:**
-- Ruby 3.3
-- Rails 9.0
+- Ruby 3.4
+- Rails 8.1
 - PostgreSQL 16
 - Devise for authentication
 - Pundit for authorization
@@ -177,7 +177,7 @@ Server.online.joins(:project).merge(current_user_projects)
 - **Blade Templates** - Clean, powerful templating engine
 
 **Technology Stack:**
-- PHP 8.2
+- PHP 8.4
 - Laravel 11.0
 - PostgreSQL 16
 - Laravel Breeze for authentication
@@ -387,7 +387,7 @@ To use in production, you should:
 
 ## 🌟 Conclusion
 
-Both Rails 9 and Laravel 11 are excellent frameworks capable of building sophisticated applications. The choice between them often comes down to:
+Both Rails 8 and Laravel 11 are excellent frameworks capable of building sophisticated applications. The choice between them often comes down to:
 
 - **Team expertise** - Ruby vs PHP knowledge
 - **Ecosystem** - Gem vs Package preference
@@ -411,6 +411,6 @@ This comparison demonstrates that both frameworks can elegantly solve complex pr
 
 ---
 
-**Built with ❤️ to compare Ruby on Rails 9 and Laravel 11**
+**Built with ❤️ to compare Ruby on Rails 8 and Laravel 11**
 
 *This is a comprehensive, production-ready example - not a toy application.*

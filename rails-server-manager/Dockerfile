@@ -1,4 +1,4 @@
-FROM ruby:3.3.0-slim
+FROM ruby:3.4-slim
 
 # Install dependencies
 RUN apt-get update -qq && \
@@ -8,6 +8,7 @@ RUN apt-get update -qq && \
     git \
     libpq-dev \
     libvips \
+    libyaml-dev \
     node-gyp \
     pkg-config \
     python-is-python3 && \
@@ -22,7 +23,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
 WORKDIR /rails
 
 # Install Ruby gems
-COPY Gemfile Gemfile.lock ./
+COPY Gemfile ./
 RUN bundle install
 
 # Copy application code
@@ -32,20 +33,7 @@ COPY . .
 RUN SECRET_KEY_BASE=dummy bundle exec rails assets:precompile || true
 
 # Create startup script
-RUN echo '#!/bin/bash\n\
-set -e\n\
-\n\
-# Remove pre-existing server.pid\n\
-rm -f /rails/tmp/pids/server.pid\n\
-\n\
-# Run database migrations\n\
-bundle exec rails db:prepare\n\
-\n\
-# Seed database if empty\n\
-bundle exec rails db:seed\n\
-\n\
-# Start Rails server\n\
-exec bundle exec rails server -b 0.0.0.0' > /rails/docker-entrypoint.sh && \
+RUN printf '#!/bin/bash\nset -e\n\nrm -f /rails/tmp/pids/server.pid\nbundle exec rails db:prepare\nbundle exec rails db:seed\nexec bundle exec rails server -b 0.0.0.0\n' > /rails/docker-entrypoint.sh && \
     chmod +x /rails/docker-entrypoint.sh
 
 EXPOSE 3000

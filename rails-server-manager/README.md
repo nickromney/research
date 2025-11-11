@@ -1,6 +1,6 @@
-# Rails 9 Server Manager
+# Rails 8.1 Server Manager
 
-A fully-featured server management application built with Ruby on Rails 9. This application demonstrates modern Rails development practices including:
+A fully-featured server management application built with Ruby on Rails 8.1 (latest available version). This application demonstrates modern Rails development practices including:
 
 - User authentication with Devise
 - Multi-tenancy with user groups
@@ -37,8 +37,8 @@ User: john@example.com / password123
 
 ## Technology Stack
 
-- Ruby 3.3
-- Rails 9.0
+- Ruby 3.4
+- Rails 8.1
 - PostgreSQL 16
 - Devise (authentication)
 - Net::SSH (SSH connectivity)

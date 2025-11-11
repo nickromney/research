@@ -1,9 +1,9 @@
 source "https://rubygems.org"
 
-ruby "~> 3.3.0"
+ruby "~> 3.4.0"
 
-# Rails 9
-gem "rails", "~> 9.0.0"
+# Rails 8.1 (latest available)
+gem "rails", "~> 8.1.0"
 
 # Database
 gem "pg", "~> 1.5"
