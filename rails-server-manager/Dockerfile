@@ -33,7 +33,7 @@ COPY . .
 RUN SECRET_KEY_BASE=dummy bundle exec rails assets:precompile || true
 
 # Create startup script
-RUN printf '#!/bin/bash\nset -e\n\nrm -f /rails/tmp/pids/server.pid\nbundle exec rails db:prepare\nbundle exec rails db:seed\nexec bundle exec rails server -b 0.0.0.0\n' > /rails/docker-entrypoint.sh && \
+RUN printf '#!/bin/bash\nset -e\n\nrm -f /rails/tmp/pids/server.pid\nbundle exec rake db:prepare\nbundle exec rake db:seed\nexec bundle exec rackup config.ru -o 0.0.0.0 -p 3000\n' > /rails/docker-entrypoint.sh && \
     chmod +x /rails/docker-entrypoint.sh
 
 EXPOSE 3000

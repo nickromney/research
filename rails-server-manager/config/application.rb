@@ -7,8 +7,8 @@ Bundler.require(*Rails.groups)
 
 module ServerManager
   class Application < Rails::Application
-    # Initialize configuration defaults for Rails 9.0
-    config.load_defaults 9.0
+    # Initialize configuration defaults for Rails 8.1
+    config.load_defaults 8.1
 
     # Configuration for the application, engines, and railties goes here
     config.time_zone = "UTC"
