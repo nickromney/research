@@ -13,6 +13,12 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
+    ignore:
+      # Ignore major version updates for core dependencies
+      - dependency-name: "express"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "body-parser"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "npm"
     directory: "/mock-api-lab/apim-simulator"
@@ -27,6 +33,14 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
+    ignore:
+      # Ignore major version updates for core dependencies
+      - dependency-name: "express"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "body-parser"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "axios"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "npm"
     directory: "/mock-api-lab"
@@ -41,6 +55,10 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
+    ignore:
+      # Ignore major version updates for dev dependencies
+      - dependency-name: "concurrently"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "npm"
     directory: "/github-release-action"
@@ -68,3 +86,11 @@ updates:
       - "dependencies"
     commit-message:
       prefix: "ci"
+    ignore:
+      # Ignore major version updates for GitHub Actions
+      - dependency-name: "actions/checkout"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "actions/setup-node"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "actions/upload-artifact"
+        update-types: ["version-update:semver-major"]
