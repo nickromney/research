@@ -177,7 +177,7 @@ Server.online.joins(:project).merge(current_user_projects)
 - **Blade Templates** - Clean, powerful templating engine
 
 **Technology Stack:**
-- PHP 8.4
+- PHP 8.3
 - Laravel 11.0
 - PostgreSQL 16
 - Laravel Breeze for authentication

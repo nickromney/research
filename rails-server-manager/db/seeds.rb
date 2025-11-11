@@ -121,7 +121,7 @@ db1 = Server.create!(
   status: "unknown"
 )
 
-dev1 = Server.create!(
+Server.create!(
   name: "Development Server",
   hostname: "dev.example.com",
   port: 22,
